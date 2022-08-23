@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	var positiony = document.getElementById("playery");
 	var player;
 	var px;
-	var grid;
-	var box;
-	var direction;
+	var matrix;
+	var tempPos;
+	var boxes;
 
 //#####################################
 //init values
@@ -20,90 +20,125 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	
 	canvas.width = 800;
 	canvas.height = 800;
-	
 	px = 20;
+	matrix = createMatrix(40,40,0);
 	
 	player = {
 		x: 19,
 		y: 19,
-		color: "blue"
+		color: "blue",
 	};
 	
-	box = {
-		x: 29,
-		y: 9,
-		color: "orange"
-	};
-		
+	tempPos = {
+		x: player.x,
+		y: player.y
+	}
+	
+	boxes = {
+		color: "orange",
+	}
+	
 //#####################################
 //UI interactions
 //#####################################	
 
 
-	
+
 //#####################################
 //functions
 //#####################################	
 	
+	function createMatrix(x,y,defaultValue){
+		var arr = [];
+		for(var i = 0; i < x; i++){
+			arr.push([]);
+			arr[i].push(new Array(y));
+			for(var j = 0; j < y; j++){
+				arr[i][j] = defaultValue;
+			}
+		}
+	return arr;
+	}
+	
 	function move(){
-		//checkNextField();
-		redrawAll();
+		matrix[tempPos.x][tempPos.y] = 0;
+		matrix[player.x][player.y] = 1;
 		updateCoordinatesDisplay();
+		redrawMatrix();
 	}
 	
-	function redrawAll(){
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		redrawPlayer();
-		pushBox();
-		redrawBox();
+	function checkValidMovement(vDirection){
+		switch(vDirection){
+			case 1:
+				if(player.y - 1 >= 0){
+					storePosition(player.x,player.y);
+					player.y = player.y - 1;
+				}
+				break;
+			case 2:
+				if(player.x + 1 <= 39){
+					storePosition(player.x,player.y);
+					player.x = player.x + 1;
+				}
+				break;
+			case 3:
+				if(player.y + 1 <= 39){
+					storePosition(player.x,player.y);
+					player.y = player.y + 1;
+				}
+				break;
+			case 4:
+				if(player.x - 1 >= 0){
+					storePosition(player.x,player.y);
+					player.x = player.x - 1;
+				}
+				break;
+		}
+		move();
 	}
 	
-	function redrawPlayer(){
-		ctx.fillStyle = player.color;
-		ctx.fillRect(player.x * px, player.y * px, px, px);
-	}
-	
-	function redrawBox(){
-		ctx.fillStyle = box.color;
-		ctx.fillRect(box.x * px, box.y * px, px, px);
+	function storePosition(x,y){
+		tempPos = {
+			x: x,
+			y: y
+		}
 	}
 	
 	function updateCoordinatesDisplay(){
 		positionx.innerHTML = "X: " + (player.x + 1);
 		positiony.innerHTML = "Y: " + (player.y + 1);
 	}
-
-	function pushBox(){
-		switch(direction){
-			case 1:
-				if ((player.y == box.y) && (player.x == box.x)){
-					box.y = box.y -1;
-				}
-				break;
-			case 2:
-				if ((player.x == box.x) && (player.y == box.y)){
-					box.x = box.x +1;
-				}
-				break;
-			case 3:
-				if ((player.y == box.y) && (player.x == box.x)){
-					box.y = box.y +1;
-				}
-				break;
-			case 4:
-				if ((player.x == box.x) && (player.y == box.y)){
-					box.x = box.x -1;
-				}
-				break;
+	
+	function redrawMatrix(){
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		for(var i = 0; i < 40; i++){
+			for(var j = 0; j < 40; j++){
+				draw(i,j);
+			}
 		}
 	}
-
+	
+	function draw(x,y){
+		switch(matrix[x][y]){
+			case 0:
+				ctx.fillStyle = "white"
+				break;
+			case 1:
+				ctx.fillStyle = player.color;
+				break;
+			case 2:
+				ctx.fillStyle = boxes.color;
+				break;
+		}
+		ctx.fillRect(x * px, y * px, px, px);
+	}
+	
+	
 //#####################################
 //game
 //#####################################	
-
+	
 	move();
-
 
 //#####################################
 //controls
@@ -112,34 +147,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	window.onkeydown = function(event){
 		switch(event.keyCode){
 			case 40://down
-				direction = 3;
-				player.y = player.y + 1;
-				move();
+				checkValidMovement(3);
 				break;
 			case 39://right
-				direction = 2;
-				player.x = player.x + 1;
-				move();
+				checkValidMovement(2);
 				break;
 			case 38://up
-				direction = 1;
-				player.y = player.y - 1;
-				move();
+				checkValidMovement(1);
 				break;
 			case 37://left
-				direction = 4;
-				player.x = player.x - 1;
-				move();
+				checkValidMovement(4);
+				break;
+			case 32://spacebar
+				//DEBUG VISUALIZATION
+				console.table(matrix);
+				//console.table(boxPos);
 				break;
 		}
 	}
-		var arrow_keys_handler = function(e) {
-		switch(e.keyCode){
-			case 37: case 39: case 38:  case 40: // Arrow keys
-			case 32: e.preventDefault(); break; // Space
-			default: break; // do not block other keys
-		}
-	};
-	window.addEventListener("keydown", arrow_keys_handler, false);
-
 });
