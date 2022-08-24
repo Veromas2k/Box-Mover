@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	var player;
 	var px;
 	var matrix;
-	var tempPos;
 	var boxes;
 
 //#####################################
@@ -26,17 +25,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	player = {
 		x: 19,
 		y: 19,
+		lastX: 19,
+		lastY: 19,
 		color: "blue",
 	};
 	
-	tempPos = {
-		x: player.x,
-		y: player.y
-	}
-	
 	boxes = {
+		positions: [],
 		color: "orange",
 	}
+	
+	boxes.positions.unshift({x: 10, y: 10});
+	boxes.positions.unshift({x: 15, y: 10});
+	boxes.positions.unshift({x: 20, y: 10});
+	boxes.positions.unshift({x: 25, y: 10});
 	
 //#####################################
 //UI interactions
@@ -61,34 +63,39 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	}
 	
 	function move(){
-		matrix[tempPos.x][tempPos.y] = 0;
+		playerMovement();
+		insertBoxes();
+		redrawMatrix();
+	}
+	
+	function playerMovement(){
+		matrix[player.lastX][player.lastY] = 0;
 		matrix[player.x][player.y] = 1;
 		updateCoordinatesDisplay();
-		redrawMatrix();
 	}
 	
 	function checkValidMovement(vDirection){
 		switch(vDirection){
 			case 1:
-				if(player.y - 1 >= 0){
+				if(matrix[player.x][player.y - 1] == 0){
 					storePosition(player.x,player.y);
 					player.y = player.y - 1;
 				}
 				break;
 			case 2:
-				if(player.x + 1 <= 39){
+				if(matrix[player.x +1][player.y] == 0){					
 					storePosition(player.x,player.y);
 					player.x = player.x + 1;
 				}
 				break;
 			case 3:
-				if(player.y + 1 <= 39){
+				if(matrix[player.x][player.y + 1] == 0){
 					storePosition(player.x,player.y);
 					player.y = player.y + 1;
 				}
 				break;
 			case 4:
-				if(player.x - 1 >= 0){
+				if(matrix[player.x -1][player.y] == 0){
 					storePosition(player.x,player.y);
 					player.x = player.x - 1;
 				}
@@ -98,15 +105,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	}
 	
 	function storePosition(x,y){
-		tempPos = {
-			x: x,
-			y: y
-		}
+		player.lastX = x;
+		player.lastY = y;
 	}
 	
 	function updateCoordinatesDisplay(){
 		positionx.innerHTML = "X: " + (player.x + 1);
 		positiony.innerHTML = "Y: " + (player.y + 1);
+	}
+	
+	function insertBoxes(){
+		boxes.positions.forEach(insertBoxesIntoMatrix)
+	}
+	
+	function insertBoxesIntoMatrix(box){
+		matrix[box.x][box.y] = 2;
+	}
+	
+	function pushBox(x,y,direction){
+		
 	}
 	
 	function redrawMatrix(){
@@ -159,9 +176,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				checkValidMovement(4);
 				break;
 			case 32://spacebar
-				//DEBUG VISUALIZATION
+				//DEBUG MATRIX VISUALIZATION
 				console.table(matrix);
-				//console.table(boxPos);
 				break;
 		}
 	}
