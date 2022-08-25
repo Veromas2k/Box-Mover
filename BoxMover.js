@@ -35,10 +35,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		color: "orange",
 	}
 	
-	boxes.positions.unshift({x: 10, y: 10});
-	boxes.positions.unshift({x: 15, y: 10});
-	boxes.positions.unshift({x: 20, y: 10});
-	boxes.positions.unshift({x: 25, y: 10});
+	matrix[10][10] = 2;
+	matrix[10][15] = 2;
+	matrix[15][10] = 2;
+	matrix[15][15] = 2;
 	
 //#####################################
 //UI interactions
@@ -63,43 +63,73 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	}
 	
 	function move(){
-		playerMovement();
-		insertBoxes();
+		processPlayerMovement();
 		redrawMatrix();
 	}
 	
-	function playerMovement(){
+	function processPlayerMovement(){
 		matrix[player.lastX][player.lastY] = 0;
 		matrix[player.x][player.y] = 1;
 		updateCoordinatesDisplay();
 	}
 	
-	function checkValidMovement(vDirection){
+	function movementHandler(vDirection){
 		switch(vDirection){
 			case 1:
-				if(matrix[player.x][player.y - 1] == 0){
-					storePosition(player.x,player.y);
-					player.y = player.y - 1;
+				storePosition(player.x,player.y);
+				switch(matrix[player.x][player.y - 1]){
+					case 0:
+						player.y = player.y - 1;
+						break;
+					case 2:
+						if(matrix[player.x][player.y - 2] == 0){
+							player.y = player.y - 1;
+							matrix[player.x][player.y - 1] = 2;
+						}
+						break;
 				}
 				break;
 			case 2:
-				if(matrix[player.x +1][player.y] == 0){					
-					storePosition(player.x,player.y);
-					player.x = player.x + 1;
+				storePosition(player.x,player.y);
+				switch(matrix[player.x + 1][player.y]){
+					case 0:
+						player.x = player.x + 1;
+						break;
+					case 2:
+						if(matrix[player.x + 2][player.y] == 0){
+							player.x = player.x + 1;
+							matrix[player.x + 1][player.y] = 2;									
+						}
+						break;
 				}
 				break;
 			case 3:
-				if(matrix[player.x][player.y + 1] == 0){
-					storePosition(player.x,player.y);
-					player.y = player.y + 1;
+				storePosition(player.x,player.y);
+				switch(matrix[player.x][player.y + 1]){
+					case 0:
+						player.y = player.y + 1;
+						break;
+					case 2:
+						if(matrix[player.x][player.y + 2] == 0){
+							player.y = player.y + 1;
+							matrix[player.x][player.y + 1] = 2;
+						}
+						break;
 				}
 				break;
 			case 4:
-				if(matrix[player.x -1][player.y] == 0){
-					storePosition(player.x,player.y);
-					player.x = player.x - 1;
+				storePosition(player.x,player.y);
+				switch(matrix[player.x - 1][player.y]){
+					case 0:
+						player.x = player.x - 1;
+						break;
+					case 2:
+						if(matrix[player.x - 2][player.y] == 0){
+							player.x = player.x - 1;
+							matrix[player.x - 1][player.y] = 2;									
+						}
+						break;
 				}
-				break;
 		}
 		move();
 	}
@@ -114,16 +144,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		positiony.innerHTML = "Y: " + (player.y + 1);
 	}
 	
-	function insertBoxes(){
-		boxes.positions.forEach(insertBoxesIntoMatrix)
-	}
-	
-	function insertBoxesIntoMatrix(box){
-		matrix[box.x][box.y] = 2;
-	}
-	
 	function pushBox(x,y,direction){
-		
+	
 	}
 	
 	function redrawMatrix(){
@@ -164,16 +186,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	window.onkeydown = function(event){
 		switch(event.keyCode){
 			case 40://down
-				checkValidMovement(3);
+				movementHandler(3);
 				break;
 			case 39://right
-				checkValidMovement(2);
+				movementHandler(2);
 				break;
 			case 38://up
-				checkValidMovement(1);
+				movementHandler(1);
 				break;
 			case 37://left
-				checkValidMovement(4);
+				movementHandler(4);
 				break;
 			case 32://spacebar
 				//DEBUG MATRIX VISUALIZATION
