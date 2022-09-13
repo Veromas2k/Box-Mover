@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	var px;
 	var matrix;
 	var boxes;
+	var empty;
 
 //#####################################
 //init values
@@ -25,15 +26,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	player = {
 		x: 19,
 		y: 19,
-		lastX: 19,
-		lastY: 19,
 		color: "blue",
 	};
 	
 	boxes = {
 		positions: [],
 		color: "orange",
-	}
+	};
+	
+	empty = {
+		color: "white",
+	};
+
+//#####################################
+//init map
+//#####################################	
 	
 	matrix[10][10] = 2;
 	matrix[10][15] = 2;
@@ -61,91 +68,63 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		}
 	return arr;
 	}
+
+	function movementHandler(direction){
+		matrix[player.x][player.y] = 0;
+		switch(direction){
+			case 1:
+				if(checkValidMovement(player.x, player.y, 0, -1) == true){
+					player.y = player.y - 1;
+				}
+				break;
+			case 2:
+				if(checkValidMovement(player.x, player.y, +1, 0) == true){
+					player.x = player.x + 1;
+				}
+				break;
+			case 3:
+				if(checkValidMovement(player.x, player.y, 0, +1) == true){
+					player.y = player.y + 1;
+				}
+				break;
+			case 4:
+				if(checkValidMovement(player.x, player.y, -1, 0) == true){
+					player.x = player.x - 1;
+				}
+		}
+		onAfterMovement();
+	}
 	
-	function move(){
+	function checkValidMovement(posX, posY, modX, modY){
+		switch(matrix[posX + modX][posY + modY]){
+			case 0:
+				return(true);
+				break;
+			case 2:
+				if(checkValidMovement(posX + modX, posY + modY, modX, modY) == true){
+					matrix[posX + modX + modX][posY + modY + modY] = 2;
+					return(true);
+				};
+				break;
+			default:
+				return(false);
+				break;
+		}
+	}
+
+	function onAfterMovement(){
 		processPlayerMovement();
 		redrawMatrix();
 	}
 	
 	function processPlayerMovement(){
-		matrix[player.lastX][player.lastY] = 0;
 		matrix[player.x][player.y] = 1;
 		updateCoordinatesDisplay();
-	}
-	
-	function movementHandler(vDirection){
-		switch(vDirection){
-			case 1:
-				storePosition(player.x,player.y);
-				switch(matrix[player.x][player.y - 1]){
-					case 0:
-						player.y = player.y - 1;
-						break;
-					case 2:
-						if(matrix[player.x][player.y - 2] == 0){
-							player.y = player.y - 1;
-							matrix[player.x][player.y - 1] = 2;
-						}
-						break;
-				}
-				break;
-			case 2:
-				storePosition(player.x,player.y);
-				switch(matrix[player.x + 1][player.y]){
-					case 0:
-						player.x = player.x + 1;
-						break;
-					case 2:
-						if(matrix[player.x + 2][player.y] == 0){
-							player.x = player.x + 1;
-							matrix[player.x + 1][player.y] = 2;									
-						}
-						break;
-				}
-				break;
-			case 3:
-				storePosition(player.x,player.y);
-				switch(matrix[player.x][player.y + 1]){
-					case 0:
-						player.y = player.y + 1;
-						break;
-					case 2:
-						if(matrix[player.x][player.y + 2] == 0){
-							player.y = player.y + 1;
-							matrix[player.x][player.y + 1] = 2;
-						}
-						break;
-				}
-				break;
-			case 4:
-				storePosition(player.x,player.y);
-				switch(matrix[player.x - 1][player.y]){
-					case 0:
-						player.x = player.x - 1;
-						break;
-					case 2:
-						if(matrix[player.x - 2][player.y] == 0){
-							player.x = player.x - 1;
-							matrix[player.x - 1][player.y] = 2;									
-						}
-						break;
-				}
-		}
-		move();
-	}
-	
-	function storePosition(x,y){
-		player.lastX = x;
-		player.lastY = y;
-	}
+	}	
 	
 	function updateCoordinatesDisplay(){
 		positionx.innerHTML = "X: " + (player.x + 1);
 		positiony.innerHTML = "Y: " + (player.y + 1);
-	}
-	
-	function pushBox(x,y,direction){
-	
 	}
 	
 	function redrawMatrix(){
@@ -160,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	function draw(x,y){
 		switch(matrix[x][y]){
 			case 0:
-				ctx.fillStyle = "white"
+				ctx.fillStyle = empty.color;
 				break;
 			case 1:
 				ctx.fillStyle = player.color;
@@ -177,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 //game
 //#####################################	
 	
-	move();
+	onAfterMovement();
 
 //#####################################
 //controls
