@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	var matrix;
 	var boxes;
 	var empty;
+	var wall;
 
 //#####################################
 //init values
@@ -24,34 +25,34 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	matrix = createMatrix(40,40,0);
 	
 	player = {
-		x: 19,
+		x: 19,//outsource and randomize
 		y: 19,
 		color: "blue",
 	};
 	
 	boxes = {
-		positions: [],
 		color: "orange",
 	};
 	
 	empty = {
 		color: "white",
 	};
+	
+	wall = {
+		color: "black",
+	};
 
 //#####################################
 //init map
 //#####################################	
-	
-	matrix[10][10] = 2;
-	matrix[10][15] = 2;
-	matrix[15][10] = 2;
-	matrix[15][15] = 2;
-	
-//#####################################
-//UI interactions
-//#####################################	
 
+	for(var i = 0; i < 40; i++){
+		fillRandomEmptyField(2,38,1);
+	};
 
+	for(var i = 0; i < 4; i++){
+		fillRandomEmptyField(3,39,0);
+	};
 
 //#####################################
 //functions
@@ -67,6 +68,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			}
 		}
 	return arr;
+	}
+	
+	function fillRandomEmptyField(value,max,min){
+		var x = Math.floor(Math.random() * max) + min;
+		var y = Math.floor(Math.random() * max) + min;
+		if (matrix[x][y] == 0){
+			matrix[x][y] = value
+		}else{
+			fillRandomEmptyField(value,max,min);
+		}
 	}
 
 	function movementHandler(direction){
@@ -102,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				break;
 			case 2:
 				if(checkValidMovement(posX + modX, posY + modY, modX, modY) == true){
-					matrix[posX + modX + modX][posY + modY + modY] = 2;
+					matrix[posX + 2 * modX][posY + 2 * modY] = 2;
 					return(true);
 				};
 				break;
@@ -131,12 +142,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		for(var i = 0; i < 40; i++){
 			for(var j = 0; j < 40; j++){
-				draw(i,j);
+				drawField(i,j);
 			}
 		}
 	}
 	
-	function draw(x,y){
+	function drawField(x,y){
 		switch(matrix[x][y]){
 			case 0:
 				ctx.fillStyle = empty.color;
@@ -147,13 +158,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			case 2:
 				ctx.fillStyle = boxes.color;
 				break;
+			case 3:
+				ctx.fillStyle = wall.color;
+				break;
 		}
 		ctx.fillRect(x * px, y * px, px, px);
 	}
 	
 	
 //#####################################
-//game
+//gameInit
 //#####################################	
 	
 	onAfterMovement();
