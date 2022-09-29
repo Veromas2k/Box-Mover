@@ -1,5 +1,5 @@
 # Box-Mover
-Blue: Player
-Orange: Boxes
-Black: Walls
-White: Empty
+Blue: Player /n
+Orange: Boxes /n
+Black: Walls /n
+White: Empty 
